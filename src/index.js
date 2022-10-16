@@ -23,10 +23,6 @@ function fetchCountries(name) {
   const URL = `${BASE_URL}/name/${name}?fields=name,capital,population,flags,languages`;
 
   return fetch(URL).then(responce => {
-    if (!responce.ok) {
-      throw new Error();
-    }
-    console.log(responce);
     return responce.json();
   });
 }
@@ -36,31 +32,49 @@ function searchCountries(evt) {
 
   const inputData = refs.input.value.trim();
 
-  fetchCountries(inputData).then(renderCountryList);
-  // .catch(Notiflix.Notify.failure('Oops, there is no country with that name'));
+  fetchCountries(inputData)
+    .then(renderCountryList)
+    .catch(error => {
+      Notiflix.Notify.failure('Oops, there is no country with that name');
+    });
 }
 
 function clearInput() {
-  refs.countryInfo.value = '';
-  refs.countryList.value = '';
+  refs.countryInfo.innerHTML = '';
+  refs.countryList.innerHTML = '';
 }
 
 function renderCountryList(responceAPI) {
   console.dir(responceAPI);
+  clearInput();
 
   if (responceAPI.length > 10) {
     Notiflix.Notify.info('Too many matches found. Please enter a more specific name.');
   } else if (responceAPI.length === 1) {
-    console.log(responceAPI);
+    refs.countryInfo.innerHTML = renderCountryInfo(responceAPI[0]);
   } else {
-    const renderListCountry = responceAPI.map(country => renderCountriesList(country));
+    const renderListCountry = responceAPI.map(country => renderCountriesList(country)).join('');
     refs.countryList.insertAdjacentHTML('beforeend', renderListCountry);
   }
 }
 
 function renderCountriesList({ flags, name }) {
-  return `<li>
-      <img class="flag-country-list" src="${flags.svg}">
-      <p class="country-list-name">${name.official}</p>
+  return `<li class="country-listInfo">
+      <img class="country-flag" src="${flags.svg}"/>
+      <h2 class="country-list-name">${name.official}</h2>
     </li>`;
+}
+
+function renderCountryInfo({ name, flags, capital, population, languages }) {
+  return `<li class="country-main-info">
+  <div class="wrapper-country-info">
+    <img class="country-flag-info" src='${flags.svg}'/>
+    <h2 class="country-list-name">${name.official}</h2>
+  </div>
+  <div class="country-secondary-info">
+    <p><b>capital:</b> ${capital}</p>
+    <p><b>population:</b> ${population}</p>
+    <p><b>languages:</b> ${Object.values(languages)}</p>
+  </div>
+</li>`;
 }
