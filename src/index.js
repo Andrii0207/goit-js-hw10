@@ -23,6 +23,9 @@ function fetchCountries(name) {
   const URL = `${BASE_URL}/name/${name}?fields=name,capital,population,flags,languages`;
 
   return fetch(URL).then(responce => {
+    if (!responce.ok) {
+      Notiflix.Notify.failure('Oops, there is no country with that name');
+    }
     return responce.json();
   });
 }
@@ -32,11 +35,7 @@ function searchCountries(evt) {
 
   const inputData = refs.input.value.trim();
 
-  fetchCountries(inputData)
-    .then(renderCountryList)
-    .catch(error => {
-      Notiflix.Notify.failure('Oops, there is no country with that name');
-    });
+  fetchCountries(inputData).then(renderCountryList).catch(console.log);
 }
 
 function clearInput() {
@@ -45,7 +44,7 @@ function clearInput() {
 }
 
 function renderCountryList(responceAPI) {
-  console.dir(responceAPI);
+  console.log(responceAPI);
   clearInput();
 
   if (responceAPI.length > 10) {
